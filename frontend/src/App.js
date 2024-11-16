@@ -10,15 +10,17 @@ import {
   Paper,
   AppBar,
   Toolbar,
-  Grid
+  Grid,
+  TextField
 } from "@mui/material";
-import { Brightness4, Brightness7, ContactPhone } from "@mui/icons-material";
+import { Brightness4, Brightness7, ContactPhone, Search } from "@mui/icons-material";
 import ContactForm from "./components/ContactForm";
 import ContactTable from "./components/ContactTable";
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [contacts, setContacts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingContact, setEditingContact] = useState(null);
 
   const theme = createTheme({
@@ -70,10 +72,15 @@ const App = () => {
     });
   };
 
+  const filteredContacts = contacts.filter((contact) =>
+    [contact.firstName, contact.lastName, contact.email, contact.company, contact.jobTitle]
+      .some((field) => field?.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ flexGrow: 1, minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1, minHeight: "100vh" }}>
         <AppBar position="static" elevation={0}>
           <Toolbar>
             <ContactPhone sx={{ mr: 2 }} />
@@ -85,11 +92,25 @@ const App = () => {
             </IconButton>
           </Toolbar>
         </AppBar>
-        
+
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Search contacts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <Search sx={{ color: "action.active", mr: 1, my: 0.5 }} />
+                  ),
+                }}
+              />
+            </Grid>
             <Grid item xs={12} md={4}>
-              <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+              <Paper elevation={3} sx={{ p: 3, height: "100%" }}>
                 <ContactForm
                   onSubmit={handleAddOrUpdate}
                   initialData={editingContact || {}}
@@ -101,7 +122,7 @@ const App = () => {
             <Grid item xs={12} md={8}>
               <Paper elevation={3} sx={{ p: 3 }}>
                 <ContactTable
-                  contacts={contacts}
+                  contacts={filteredContacts}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
